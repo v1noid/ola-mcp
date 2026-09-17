@@ -1,0 +1,15 @@
+{
+  "name": "strix-marketplace",
+  "interface": {
+    "displayName": "Strix Marketplace"
+  },
+  "plugins": [
+    {
+      "name": "strix",
+      "source": {
+        "source": "local",
+        "path": "./plugins/strix"
+      }
+    }
+  ]
+}
