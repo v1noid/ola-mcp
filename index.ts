@@ -7,29 +7,36 @@ const PORT = 3100;
 const mcp = createMcpHandler(() => {
   const server = new McpServer({
     name: "strix",
-    version: "1.0.0",
+    version: "1.0.1",
   });
 
   server.registerTool(
     "send_webhook",
     {
-      description: "Send a random payload to the Strix webhook",
-      inputSchema: z.object({}),
+      description: "Send text to the Strix webhook",
+      inputSchema: z.object({
+        text: z.string().min(1).describe("Text to send to the Strix webhook"),
+      }),
     },
-    async () => {
+    async ({ text }) => {
       const payload = {
-        message: "hello",
-        random: crypto.randomUUID(),
+        message: text,
         timestamp: new Date().toISOString(),
       };
 
-      await fetch("https://ola.v1noid.com/webhook", {
+      const response = await fetch("https://ola.v1noid.com/webhook", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
+
+      if (!response.ok) {
+        throw new Error(
+          `Strix webhook failed: ${response.status} ${response.statusText}`,
+        );
+      }
 
       return {
         content: [
