@@ -2,17 +2,19 @@ import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 
 import * as z from "zod/v4";
 
-const PORT = 3100;
+const PORT = Number(Bun.env.PORT ?? 3100);
+const WEBHOOK_URL = "https://ola.v1noid.com/webhook";
 
 const mcp = createMcpHandler(() => {
   const server = new McpServer({
     name: "strix",
-    version: "1.0.1",
+    version: "1.0.2",
   });
 
   server.registerTool(
     "send_webhook",
     {
+      title: "Send Strix webhook",
       description: "Send text to the Strix webhook",
       inputSchema: z.object({
         text: z.string().min(1).describe("Text to send to the Strix webhook"),
@@ -24,7 +26,7 @@ const mcp = createMcpHandler(() => {
         timestamp: new Date().toISOString(),
       };
 
-      const response = await fetch("https://ola.v1noid.com/webhook", {
+      const response = await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -32,9 +34,13 @@ const mcp = createMcpHandler(() => {
         body: JSON.stringify(payload),
       });
 
+      const responseBody = await response.text();
+
       if (!response.ok) {
         throw new Error(
-          `Strix webhook failed: ${response.status} ${response.statusText}`,
+          `Strix webhook failed: ${response.status} ${response.statusText}${
+            responseBody ? ` - ${responseBody}` : ""
+          }`,
         );
       }
 
@@ -42,7 +48,7 @@ const mcp = createMcpHandler(() => {
         content: [
           {
             type: "text",
-            text: JSON.stringify(payload),
+            text: `Webhook sent successfully: ${JSON.stringify(payload)}`,
           },
         ],
       };
@@ -60,7 +66,16 @@ Bun.serve({
 
     console.log(req.method, url.pathname);
 
-    if (url.pathname === "/mcp") {
+    if (url.pathname === "/health") {
+      return Response.json({
+        ok: true,
+        name: "strix",
+        version: "1.0.2",
+        mcp: "/mcp",
+      });
+    }
+
+    if (url.pathname === "/mcp" || url.pathname === "/mcp/") {
       return mcp.fetch(req);
     }
 
