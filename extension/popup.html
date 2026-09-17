@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Ola ChatGPT Webhook</title>
+  <style>
+    body { font: 14px system-ui, sans-serif; width: 320px; margin: 16px; }
+    label { display: block; margin: 12px 0 6px; font-weight: 600; }
+    input { box-sizing: border-box; width: 100%; padding: 8px; }
+    button { margin-top: 12px; padding: 8px 12px; }
+    #status { margin-top: 10px; color: #555; }
+  </style>
+</head>
+<body>
+  <h3>Ola ChatGPT Webhook</h3>
+  <label for="webhook">Webhook URL</label>
+  <input id="webhook" type="url" placeholder="https://example.com/webhook">
+  <label><input id="enabled" type="checkbox"> Enable sending</label>
+  <button id="save">Save</button>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
