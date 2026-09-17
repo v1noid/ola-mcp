@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Ola ChatGPT Webhook",
+  "version": "1.0.0",
+  "description": "Reads ChatGPT assistant responses and sends new responses to a configurable webhook.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://chatgpt.com/*", "https://chat.openai.com/*", "<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Ola ChatGPT Webhook",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "popup.html"
+}
