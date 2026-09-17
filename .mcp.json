@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "strix": {
+      "type": "http",
+      "url": "https://ola.v1noid.com/mcp"
+    }
+  }
+}

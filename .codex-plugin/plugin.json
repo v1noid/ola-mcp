@@ -1,0 +1,5 @@
+{
+  "name": "strix",
+  "version": "1.0.0",
+  "description": "Send test payloads to the Strix webhook"
+}
