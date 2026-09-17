@@ -1,6 +1,6 @@
 {
   "name": "strix",
-  "version": "1.0.1",
+  "version": "1.0.1+codex.20260918-0048",
   "description": "Send text payloads to the Strix webhook through the remote Strix MCP server.",
   "author": {
     "name": "v1noid",
