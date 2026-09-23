@@ -13,52 +13,91 @@ export class ChatGPTBrowser {
 
   async launch() {
     this.browser = await chromium.launch({ headless: false });
-    this.page = await this.browser.newPage({ viewport: { width: 1440, height: 900 } });
-    await this.page.goto("https://chatgpt.com/", { waitUntil: "domcontentloaded" });
+    this.page = await this.browser.newPage({
+      viewport: { width: 1440, height: 900 },
+    });
+
+    await this.page.goto("https://chatgpt.com/", {
+      waitUntil: "domcontentloaded",
+    });
+
     return this.page;
+  }
+
+  private composer() {
+    if (!this.page) throw new Error("Browser is not started");
+
+    return this.page.getByRole("textbox", { name: "Chat with ChatGPT" });
   }
 
   async waitForLogin(timeoutMs = 5 * 60 * 1000) {
     if (!this.page) throw new Error("Browser is not started");
-    const deadline = Date.now() + timeoutMs;
+
     console.log("Waiting for ChatGPT login in the browser...");
 
-    while (Date.now() < deadline) {
-      const composer = this.page.locator('textarea, [contenteditable="true"], div[role="textbox"]').first();
-      try {
-        if (await composer.isVisible({ timeout: 500 })) return;
-      } catch {}
-      await this.page.waitForTimeout(1000);
-    }
-    throw new Error("Timed out waiting for ChatGPT login.");
+    await this.composer().waitFor({
+      state: "visible",
+      timeout: timeoutMs,
+    });
   }
 
   async sendMessage(message: string) {
     if (!this.page) throw new Error("Browser is not started");
-    const composer = this.page.locator('textarea, [contenteditable="true"], div[role="textbox"]').first();
-    await composer.waitFor({ state: "visible", timeout: 15_000 });
-    await composer.fill(message);
-    await composer.press("Enter");
 
-    const messages = this.page.locator('[data-message-author-role="assistant"]');
-    const before = await messages.count();
+    const composer = this.composer();
+
+    await composer.waitFor({
+      state: "visible",
+      timeout: 15_000,
+    });
+
+    await composer.fill(message);
+    await this.page.getByTestId("send-button").click();
+
+    return this.waitForResponse();
+  }
+
+  private async waitForResponse() {
+    if (!this.page) throw new Error("Browser is not started");
+
+    const assistantMessages = this.page.locator(
+      '[data-message-author-role="assistant"]'
+    );
+
+    const before = await assistantMessages.count();
+
     await this.page.waitForFunction(
-      (previous) => document.querySelectorAll('[data-message-author-role="assistant"]').length > previous,
+      (previous) =>
+        document.querySelectorAll(
+          '[data-message-author-role="assistant"]'
+        ).length > previous,
       before,
       { timeout: 120_000 }
     );
 
-    const latest = messages.last();
+    const latest = assistantMessages.last();
     let last = "";
+
     for (let i = 0; i < 600; i++) {
       const current = (await latest.innerText()).trim();
+
       if (current && current === last) {
         await this.page.waitForTimeout(1200);
-        if ((await latest.innerText()).trim() === current) return current;
+
+        const stable = (await latest.innerText()).trim();
+
+        if (stable === current) {
+          return current;
+        }
+
+        last = stable;
+      } else {
+        last = current;
       }
-      last = current;
+
       await this.page.waitForTimeout(500);
     }
+
     return last;
   }
 
