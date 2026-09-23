@@ -3,6 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "bin": {
+    "acute": "./src/cli.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -11,6 +14,12 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "playwright": "^1.55.0",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "scripts": {
+    "acute": "bun run src/cli.ts"
   }
 }
